@@ -1,9 +1,10 @@
 
+import os
 import logging
 from subprocess import run, PIPE, Popen
 from mypy_modules.register import register
 from mypy_modules.cli import Command, Option, Flag
-from reused_funcs import list_venvs
+from commands.reused_funcs import list_venvs
 
 def get_add_cmd() -> Command:
     msg = """
@@ -23,7 +24,12 @@ def add(args:list=[], options:dict={}, flags:list=[], nested_cmds:dict={}):
     if name in list_venvs():
         add_logger.error(f" Ya existe un entorno virtual con el nombre '{name}'")
         return
-    process = run(f'python -m virtualenv {name}', stdout=PIPE, shell=True, cd=v_dir)
+    if name in os.listdir(v_dir):
+        msg = f" Ya existe una carpeta con el nombre '{name}' en el "
+        msg += "directorio de entrornos virtuales"
+        add_logger.error(msg)
+        return
+    process = run(f'python -m virtualenv {name}', stdout=PIPE, shell=True, cwd=v_dir)
     if process.returncode != 0:
         add_logger.error(f" Error al crear el entorno virtual '{name}'")
     else:
