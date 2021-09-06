@@ -23,9 +23,9 @@ def main():
     except CmdLineError as err:
         main_logger.error(f" {err}")
         exit(1)
-    # except Exception as err:
-    #     main_logger.error(f" Error Inesperado: '{err}'")
-    #     exit(1)
+    except Exception as err:
+        main_logger.error(f" Error Inesperado: '{err}'")
+        exit(1)
     else:
         main_logger.info(" Programa finalizado correctamente")
 

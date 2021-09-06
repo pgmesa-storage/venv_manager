@@ -7,16 +7,22 @@ def list_venvs() -> list:
     venvs = os.listdir(v_dir)
     valid_venvs = []
     for venv in venvs:
-        dirs = os.listdir(v_dir+f"\\{venv}")
-        if "Lib" in dirs and "Scripts" in dirs:
-            valid_venvs.append(venv)
+        if not os.path.isdir(v_dir+f"\\{venv}"): continue
+        try:
+            dirs = os.listdir(v_dir+f"\\{venv}")
+            ac_bat_path = v_dir+f"\\{venv}\\Scripts\\activate.bat"
+            exist_ac_bat = os.path.exists(ac_bat_path)
+            if "Lib" in dirs and "Scripts" in dirs and exist_ac_bat:
+                valid_venvs.append(venv)
+        except:
+            continue
     return valid_venvs
 
 CALLING_DIR = os.getcwd()
     
 def save_calling_dir(sys_argv:list):
     global CALLING_DIR
-    if "C:" in sys_argv[0]:
+    if "C:" in sys_argv[1]:
         CALLING_DIR = sys_argv.pop(1)
     return sys_argv
 

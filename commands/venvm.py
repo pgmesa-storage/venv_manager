@@ -8,6 +8,7 @@ from .add_cmd.add import get_add_cmd, add
 from .activate_cmd.activate import activate, get_activate_cmd
 from .list_cmd.list import list_, get_list_cmd
 from .rm_cmd.rm import get_rm_cmd, rm
+from .clear_cmd.clear import get_clear_cmd, clear
 
 
 def get_venvm_cmd() -> Command:
@@ -29,6 +30,9 @@ def get_venvm_cmd() -> Command:
     # +++++++++++++++++++++++++
     rm_cmd = get_rm_cmd()
     venvm.nest_cmd(rm_cmd)
+    # +++++++++++++++++++++++++
+    clear_cmd = get_clear_cmd()
+    venvm.nest_cmd(clear_cmd)
     # -------------------------
     dir_opt = def_dir_opt()
     venvm.add_option(dir_opt)
@@ -114,8 +118,14 @@ def venvm(args:list=[], options:dict={}, flags:list=[], nested_cmds:dict={}):
         venvm_logger.info(" Cmd window has been openned")
         return
     elif "--change-dir" in options:
-        
-        ...
+        new_dir = options["--change-dir"][0]
+        if os.path.exists(new_dir):
+            venvs_dir = new_dir
+            register.update('venvs_dir', new_dir)
+            venvm_logger.info(f" Directory '{new_dir}' has been saved")
+        else:       
+            venvm_logger.error(f" The directory '{venvs_dir}' doesn't exist")
+        return
     
     openning_msg = f" --- VENVS DIRECTORY: '{venvs_dir}' ---"
     print("-"*len(openning_msg))
@@ -133,6 +143,9 @@ def venvm(args:list=[], options:dict={}, flags:list=[], nested_cmds:dict={}):
     elif "rm" in nested_cmds:
         cmd_info = nested_cmds.pop("rm")
         rm(**cmd_info)
+    elif "clear" in nested_cmds:
+        cmd_info = nested_cmds.pop("clear")
+        clear(**cmd_info)
     else:
         print(" + Program that manages python virtual environments with 'virtualenv' module")
     print()
