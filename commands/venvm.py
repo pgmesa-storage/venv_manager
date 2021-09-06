@@ -1,6 +1,7 @@
 
 import os
 import logging
+from subprocess import Popen
 from mypy_modules.cli import Command, Option, Flag
 from mypy_modules.register import register
 from .add_cmd.add import get_add_cmd, add
@@ -8,13 +9,13 @@ from .activate_cmd.activate import activate, get_activate_cmd
 from .list_cmd.list import list_, get_list_cmd
 from .rm_cmd.rm import get_rm_cmd, rm
 
+
 def get_venvm_cmd() -> Command:
     msg = """
-    Allows to manage python virtual enviroments
+    Allows to manage python virtual environments
     """
     venvm = Command(
-        'venvm', description=msg, 
-        mandatory_nested_cmd=True
+        'venvm', description=msg
     )
     # +++++++++++++++++++++++++
     add_cmd = get_add_cmd()
@@ -28,8 +29,61 @@ def get_venvm_cmd() -> Command:
     # +++++++++++++++++++++++++
     rm_cmd = get_rm_cmd()
     venvm.nest_cmd(rm_cmd)
+    # -------------------------
+    dir_opt = def_dir_opt()
+    venvm.add_option(dir_opt)
+    # -------------------------
+    cmd_opt = def_cmd_opt()
+    venvm.add_option(cmd_opt)
+    # -------------------------
+    reveal_opt = def_reveal_venvs_opt()
+    venvm.add_option(reveal_opt)
+    # -------------------------
+    change_opt = def_change_dir_opt()
+    venvm.add_option(change_opt)
     
     return venvm
+
+def def_cmd_opt() -> Option:
+    msg = """
+    opens a cmd with in virtual environments dir
+    """
+    cmd = Option(
+        '--cmd', description=msg
+    )
+
+    return cmd
+
+def def_dir_opt() -> Option:
+    msg = """shows the directory where the virtual environments
+    are located"""
+    dir_ = Option(
+        '--venvs-dir', description=msg
+    )
+    
+    return dir_
+
+def def_reveal_venvs_opt() -> Option:
+    msg = """
+    reveals the directory with the virtual environments
+    """
+    reveal_venvs = Option(
+        '--reveal-venvs', description=msg
+    )
+    
+    return reveal_venvs
+
+def def_change_dir_opt() -> Option:
+    msg = """
+    <new_dir> changes the program working directory where the virtual
+    environments will be created
+    """
+    change_dir = Option(
+        '--change-dir', description=msg,
+        extra_arg=True, mandatory=True
+    )
+    
+    return change_dir
 
 venvm_logger = logging.getLogger(__name__)
 def venvm(args:list=[], options:dict={}, flags:list=[], nested_cmds:dict={}):
@@ -38,7 +92,7 @@ def venvm(args:list=[], options:dict={}, flags:list=[], nested_cmds:dict={}):
         valid_dir = False
         while not valid_dir:
             msg = ' + Add the directory where the '
-            msg += 'virtual enviroments will be saved'
+            msg += 'virtual environments will be saved'
             print(msg)
             venvs_dir = str(input(" + Directory: "))
             if os.path.exists(venvs_dir):
@@ -48,7 +102,23 @@ def venvm(args:list=[], options:dict={}, flags:list=[], nested_cmds:dict={}):
                 print()
         register.add('venvs_dir', venvs_dir)
         venvm_logger.info(f" The directory '{venvs_dir}' has been saved")
-    openning_msg = f" --- VENVS DIRECTORY: '{venvs_dir}'"
+    if "--venvs-dir" in options:
+        print(f"     + Virtual Environments Location --> '{venvs_dir}'")
+        return
+    elif "--reveal-venvs" in options:
+        Popen(f'start %windir%\explorer.exe "{venvs_dir}"', shell=True)
+        venvm_logger.info(" File explorer window has been openned")
+        return
+    elif "--cmd" in options:
+        Popen(f'start cmd /k "cd {venvs_dir}"', shell=True)
+        venvm_logger.info(" Cmd window has been openned")
+        return
+    elif "--change-dir" in options:
+        
+        ...
+    
+    openning_msg = f" --- VENVS DIRECTORY: '{venvs_dir}' ---"
+    print("-"*len(openning_msg))
     print(openning_msg)
     print()
     if "add" in nested_cmds:
@@ -63,5 +133,7 @@ def venvm(args:list=[], options:dict={}, flags:list=[], nested_cmds:dict={}):
     elif "rm" in nested_cmds:
         cmd_info = nested_cmds.pop("rm")
         rm(**cmd_info)
+    else:
+        print(" + Program that manages python virtual environments with 'virtualenv' module")
     print()
     print("-"*len(openning_msg))

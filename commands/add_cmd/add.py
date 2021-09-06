@@ -8,7 +8,7 @@ from commands.reused_funcs import list_venvs
 
 def get_add_cmd() -> Command:
     msg = """
-    <venv_name> adds a new virtual enviroment
+    <venv_name> adds a new virtual environment
     """
     add = Command(
         'add', description=msg,

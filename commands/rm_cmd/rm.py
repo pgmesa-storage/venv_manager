@@ -3,7 +3,7 @@ from mypy_modules.cli import Command, Option, Flag
 
 def get_rm_cmd() -> Command:
     msg = """
-    <venv_name> removes the virtual enviroment specified
+    <venv_name> removes the virtual environment specified
     """
     rm = Command(
         'rm', description=msg

@@ -4,13 +4,15 @@ import logging
 import platform
 from mypy_modules.cli import Cli, CmdLineError
 from commands.venvm import get_venvm_cmd, venvm
+from commands.reused_funcs import save_calling_dir
 
 logging.basicConfig(level=logging.NOTSET)
 main_logger = logging.getLogger(__name__)
 def main():
     cli = Cli(get_venvm_cmd())
     try:
-        args_processed = cli.process_cmdline(sys.argv)
+        sys_args = save_calling_dir(sys.argv)
+        args_processed = cli.process_cmdline(sys_args)
         os = platform.system()
         if os != "Windows":
             err_msg = f" Este programa no soporta '{os}':OS"
