@@ -9,6 +9,7 @@ from .activate_cmd.activate import activate, get_activate_cmd
 from .list_cmd.list import list_, get_list_cmd
 from .rm_cmd.rm import get_rm_cmd, rm
 from .clear_cmd.clear import get_clear_cmd, clear
+from commands.reused_funcs import sdbatch_init
 
 
 def get_venvm_cmd() -> Command:
@@ -91,6 +92,7 @@ def def_change_dir_opt() -> Option:
 
 venvm_logger = logging.getLogger(__name__)
 def venvm(args:list=[], options:dict={}, flags:list=[], nested_cmds:dict={}):
+    sdbatch_init()
     venvs_dir = register.load('venvs_dir')
     if venvs_dir is None:
         valid_dir = False
@@ -150,3 +152,4 @@ def venvm(args:list=[], options:dict={}, flags:list=[], nested_cmds:dict={}):
         print(" + Program that manages python virtual environments with 'virtualenv' module")
     print()
     print("-"*len(openning_msg))
+    

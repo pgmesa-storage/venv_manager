@@ -4,16 +4,12 @@ import logging
 import platform
 from mypy_modules.cli import Cli, CmdLineError
 from commands.venvm import get_venvm_cmd, venvm
-from mypy_modules.register import register
 
 logging.basicConfig(level=logging.NOTSET)
 main_logger = logging.getLogger(__name__)
 def main():
     cli = Cli(get_venvm_cmd())
     try:
-        if "__dir__" in sys.argv:
-            print(register.load('venvs_dir'))
-            return
         args_processed = cli.process_cmdline(sys.argv)
         os = platform.system()
         if os != "Windows":
