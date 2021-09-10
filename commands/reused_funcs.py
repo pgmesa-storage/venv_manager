@@ -57,10 +57,14 @@ if '%errorlevel%' NEQ '0' (
 )
 
 @REM  Ver si virtualenv esta instalado y si no lo instalamos
-call pip show virtualenv > nul
+call pip show virtualenv > nul 2>&1
 if '%errorlevel%' NEQ '0' (
-    echo Instalando virtualenv...
-    call pip install virtualenv > nul
+    echo ERR: Module 'virtualenv' is not installed
+    set /p answer="Install 'virtualenv' module? (y/n): "
+    if "%answer%" == "y" (
+        echo Instalando virtualenv...
+        call pip install virtualenv > nul
+    ) else ( exit /B 1 )
 )
 
 set calling_dir=%cd%
