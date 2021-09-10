@@ -9,7 +9,7 @@ from .activate_cmd.activate import activate, get_activate_cmd
 from .list_cmd.list import list_, get_list_cmd
 from .rm_cmd.rm import get_rm_cmd, rm
 from .clear_cmd.clear import get_clear_cmd, clear
-from commands.reused_funcs import sdbatch_init
+from commands.reused_funcs import sdbatch_init, venvm_bat_file
 
 
 def get_venvm_cmd() -> Command:
@@ -46,12 +46,27 @@ def get_venvm_cmd() -> Command:
     # -------------------------
     change_opt = def_change_dir_opt()
     venvm.add_option(change_opt)
+    # -------------------------
+    create_batch_opt = def_create_batch_opt()
+    venvm.add_option(create_batch_opt)
     
     return venvm
 
+def def_create_batch_opt() -> Option:
+    msg = """
+    <name or void> Creates a batch file for executing the program.
+    By default the name is 'pwm.bat'
+    """
+    create_bat = Option (
+        '--create-batch', description=msg,
+        extra_arg=True
+    )
+    
+    return create_bat
+
 def def_cmd_opt() -> Option:
     msg = """
-    opens a cmd with in virtual environments dir
+    opens a cmd in the virtual environments dir
     """
     cmd = Option(
         '--cmd', description=msg
@@ -92,6 +107,22 @@ def def_change_dir_opt() -> Option:
 
 venvm_logger = logging.getLogger(__name__)
 def venvm(args:list=[], options:dict={}, flags:list=[], nested_cmds:dict={}):
+    if "--create-batch" in options:
+        name = "venvm"
+        opt_args = options["--create-batch"]
+        if bool(opt_args):
+            name = opt_args[0]
+        name = f"{name}.bat"
+        try:
+            with open(name, 'w') as file:
+                file.write(venvm_bat_file)
+        except Exception as err:
+            msg = f" No se pudo crear el archivo '{name}'"
+            msg += f"\n      ERR MSG: {err}"
+            venvm_logger.error()
+        else:
+            venvm_logger.info(f" Archivo '{name}' creado con exito")
+        return
     sdbatch_init()
     venvs_dir = register.load('venvs_dir')
     if venvs_dir is None:

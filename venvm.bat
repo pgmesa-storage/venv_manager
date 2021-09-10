@@ -1,3 +1,4 @@
+
 @echo off
 
 @REM Checkeamos que python, pip y virtualenv estan instalados
@@ -25,9 +26,13 @@ if '%errorlevel%' NEQ '0' (
 set calling_dir=%cd%
 cd "C:\Users\pablo\Desktop\Pablo\Proyectos Python\venv_manager"
 python main.py %*
-call shutdown.bat
-del /f/q/s shutdown.bat > nul 
+
+if exist "C:\Users\pablo\Desktop\Pablo\Proyectos Python\venv_manager\shutdown.bat" (
+    call shutdown.bat 
+    del /f/q/s shutdown.bat > nul 
+)
 
 cd %calling_dir%
+
 
 

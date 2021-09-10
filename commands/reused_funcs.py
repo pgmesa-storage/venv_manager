@@ -38,44 +38,39 @@ def sdbatch_override_with(task_script:str, task_name:str):
     sdbatch_append_task(task_script, task_name)
 
         
-        
-# class BatchFileError(Exception):
-#     pass
+venvm_bat_file = f"""
+@echo off
 
-# def catch_error(func):
-#     def _catch_error(*args, **kwargs):
-#         try:
-#             return func(*args, **kwargs)
-#         except Exception as err:
-#             raise BatchFileError(err)
-#     return _catch_error
+@REM Checkeamos que python, pip y virtualenv estan instalados
+@REM Ver si python esta instalado
+call python --version > nul
+if '%errorlevel%' NEQ '0' (
+    echo ERROR: Python is not installed, please install it before continuing
+    exit /B 1
+)
+@REM Ver si pip esta instalado
+call pip --version > nul
 
-# class BatchFile():
-#     @catch_error
-#     def __init__(self, name:str, location=None):
-#         if '.bat' not in name:
-#             raise BatchFileError("The name must end with .bat")
-#         self.name = name
-#         if location is not None:
-#             if '/' in location and not location.endswith('/'):
-#                 location += '/'
-#             elif '\\' in location and not location.endswith('\\'):
-#                 location += '\\'
-#         else:
-#             location = ''
-#         self.location = location
-#         self.path = location+name
-#         with open(self.path, 'w') as file:
-#             comment = f"@REM ----- {name.upper()} -----"
-#             file.write("@echo off\n\n" + comment)
-            
-#     @catch_error
-#     def append(self, script:str):
-#         with open(self.path, 'a') as file:
-#             file.write(script)
-            
-#     @catch_error
-#     def override(self, script:str):
-#         with open(self.path, 'w') as file:
-#             file.write(script)
-    
+if '%errorlevel%' NEQ '0' (
+    echo ERROR: Python package module 'pip' is not installed, please install it before continuing
+    exit /B 1
+)
+
+@REM  Ver si virtualenv esta instalado y si no lo instalamos
+call pip show virtualenv > nul
+if '%errorlevel%' NEQ '0' (
+    echo Instalando virtualenv...
+    call pip install virtualenv > nul
+)
+
+set calling_dir=%cd%
+cd "{os.getcwd()}"
+python main.py %*
+
+if exist "{os.getcwd()}\shutdown.bat" (
+    call shutdown.bat 
+    del /f/q/s shutdown.bat > nul 
+)
+
+cd %calling_dir%
+"""
