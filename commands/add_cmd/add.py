@@ -5,6 +5,7 @@ from subprocess import run, PIPE, Popen
 from mypy_modules.register import register
 from mypy_modules.cli import Command, Option, Flag
 from commands.reused_funcs import list_venvs
+from ..activate_cmd.activate import activate
 
 def get_add_cmd() -> Command:
     msg = """
@@ -14,8 +15,21 @@ def get_add_cmd() -> Command:
         'add', description=msg,
         extra_arg=True, mandatory=True
     )
+    # -----------------------
+    act_opt = def_act_opt()
+    add.add_option(act_opt)
     
     return add
+
+def def_act_opt() -> Option:
+    msg = """
+    activates the virtual environment created
+    """
+    activate = Command(
+        '--activate', description=msg
+    )
+    
+    return activate
 
 add_logger = logging.getLogger(__name__)
 def add(args:list=[], options:dict={}, flags:list=[], nested_cmds:dict={}):
@@ -34,3 +48,5 @@ def add(args:list=[], options:dict={}, flags:list=[], nested_cmds:dict={}):
         add_logger.error(f" Error al crear el entorno virtual '{name}'")
     else:
         add_logger.info(f" Entorno virtual '{name}' creado con exito")
+        if "--activate" in options:
+            activate(args=[name])
