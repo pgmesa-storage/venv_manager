@@ -72,12 +72,12 @@ if '%errorlevel%' NEQ '0' (
 
 set main_calling_dir=%cd%
 set program_location="{os.getcwd()}"
-set shut_down_path ="{os.getcwd()}\{BATCH_PATH}"
+set shut_down_path="{os.getcwd()}\{BATCH_PATH}"
 cd %program_location%
 python main.py %*
 cd %main_calling_dir%
 
-if exist %shut_down_path%(
+if exist %shut_down_path% (
     call %shut_down_path%
     del %shut_down_path%
 )
