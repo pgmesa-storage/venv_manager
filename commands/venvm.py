@@ -9,7 +9,7 @@ from .activate_cmd.activate import activate, get_activate_cmd
 from .list_cmd.list import list_, get_list_cmd
 from .rm_cmd.rm import get_rm_cmd, rm
 from .clear_cmd.clear import get_clear_cmd, clear
-from commands.reused_funcs import sdbatch_init, venvm_bat_file
+from commands.reused_funcs import sdbatch_append_task, sdbatch_init, venvm_bat_file
 
 
 def get_venvm_cmd() -> Command:
@@ -38,8 +38,8 @@ def get_venvm_cmd() -> Command:
     dir_opt = def_dir_opt()
     venvm.add_option(dir_opt)
     # -------------------------
-    cmd_opt = def_cmd_opt()
-    venvm.add_option(cmd_opt)
+    cd_opt = def_cd_opt()
+    venvm.add_option(cd_opt)
     # -------------------------
     reveal_opt = def_reveal_venvs_opt()
     venvm.add_option(reveal_opt)
@@ -55,7 +55,7 @@ def get_venvm_cmd() -> Command:
 def def_create_batch_opt() -> Option:
     msg = """
     <name or void> Creates a batch file for executing the program.
-    By default the name is 'pwm.bat'
+    By default the name is 'venvm.bat'
     """
     create_bat = Option (
         '--create-batch', description=msg,
@@ -64,15 +64,15 @@ def def_create_batch_opt() -> Option:
     
     return create_bat
 
-def def_cmd_opt() -> Option:
+def def_cd_opt() -> Option:
     msg = """
-    opens a cmd in the virtual environments dir
+    changes the cmd dir to the virtual enviroments dir
     """
-    cmd = Option(
-        '--cmd', description=msg
+    cd = Option(
+        '--cd', description=msg
     )
 
-    return cmd
+    return cd
 
 def def_dir_opt() -> Option:
     msg = """shows the directory where the virtual environments
@@ -146,9 +146,11 @@ def venvm(args:list=[], options:dict={}, flags:list=[], nested_cmds:dict={}):
         Popen(f'start %windir%\explorer.exe "{venvs_dir}"', shell=True)
         venvm_logger.info(" File explorer window has been openned")
         return
-    elif "--cmd" in options:
-        Popen(f'start cmd /k "cd {venvs_dir}"', shell=True)
-        venvm_logger.info(" Cmd window has been openned")
+    elif "--cd" in options:
+        task = f'cd "{venvs_dir}" & exit /B'
+        sdbatch_append_task(task, "change dir")
+        # Popen(f'start cmd /k "cd {venvs_dir}"', shell=True)
+        venvm_logger.info(f" Changing cmd dir to -> {venvs_dir}..")
         return
     elif "--change-dir" in options:
         new_dir = options["--change-dir"][0]

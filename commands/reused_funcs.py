@@ -25,10 +25,13 @@ BATCH_PATH = BATCH_LOCATION+BATCH_NAME
 def sdbatch_init():
     with open(BATCH_PATH, 'w') as file:
         comment = f"@REM ----- {BATCH_NAME.upper()} -----\n"
-        file.write("@echo off\n\n" + comment)
+        line = "set calling_dir=%cd%\n"
+        file.write("@echo off\n\n" + comment + line)
 
 def sdbatch_append_task(task_script:str, task_name:str):
-    task_script = "\nset calling_dir=%cd%" + task_script +'\ncd %calling_dir%\n'
+    if not task_script.startswith("\n"):
+        task_script = "\n" + task_script
+    task_script = f'\ncd "{os.getcwd()}"' + task_script + "\ncd %calling_dir%\n"
     with open(BATCH_PATH, 'a') as file:
         comment = f'\n@REM {task_name}'
         file.write(comment + task_script)
@@ -37,7 +40,7 @@ def sdbatch_override_with(task_script:str, task_name:str):
     sdbatch_init()
     sdbatch_append_task(task_script, task_name)
 
-        
+     
 venvm_bat_file = f"""
 @echo off
 
@@ -68,13 +71,14 @@ if '%errorlevel%' NEQ '0' (
 )
 
 set main_calling_dir=%cd%
-cd "{os.getcwd()}"
+set program_location="{os.getcwd()}"
+set shut_down_path ="{os.getcwd()}\{BATCH_PATH}"
+cd %program_location%
 python main.py %*
-
-if exist "{os.getcwd()}\shutdown.bat" (
-    call shutdown.bat 
-    del /f/q/s shutdown.bat > nul 
-)
-
 cd %main_calling_dir%
+
+if exist %shut_down_path%(
+    call %shut_down_path%
+    del %shut_down_path%
+)
 """
