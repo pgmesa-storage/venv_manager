@@ -67,7 +67,7 @@ if '%errorlevel%' NEQ '0' (
     ) else ( exit /B 1 )
 )
 
-set calling_dir=%cd%
+set main_calling_dir=%cd%
 cd "{os.getcwd()}"
 python main.py %*
 
@@ -76,5 +76,5 @@ if exist "{os.getcwd()}\shutdown.bat" (
     del /f/q/s shutdown.bat > nul 
 )
 
-cd %calling_dir%
+cd %main_calling_dir%
 """
